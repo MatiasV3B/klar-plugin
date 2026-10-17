@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "klar": {
+      "type": "streamable-http",
+      "url": "https://klar-cloud.vercel.app/mcp"
+    }
+  }
+}

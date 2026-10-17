@@ -1,0 +1,14 @@
+{
+  "name": "klar",
+  "owner": {
+    "name": "Klar"
+  },
+  "description": "Klar: prompt injection protection for AI agents.",
+  "plugins": [
+    {
+      "name": "klar",
+      "source": "./plugins/klar",
+      "description": "Prompt injection protection for agents: MCP server plus a hook that reviews what your agent reads."
+    }
+  ]
+}

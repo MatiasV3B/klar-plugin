@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "klar": {
+      "command": "node",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/mcp/proxy.js"],
+      "env": {
+        "KLAR_API_URL": "${KLAR_API_URL:-https://klar-cloud.vercel.app}",
+        "KLAR_PROFILE": "${KLAR_PROFILE:-default}",
+        "KLAR_HOME": "${KLAR_HOME:-}"
+      }
+    }
+  }
+}

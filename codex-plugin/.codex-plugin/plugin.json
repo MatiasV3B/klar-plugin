@@ -1,0 +1,14 @@
+{
+  "name": "klar",
+  "version": "0.2.0",
+  "description": "Protects your agent from prompt injection, hidden instructions and obfuscation. Sign in with your Klar account (OAuth).",
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "Klar",
+    "shortDescription": "Prompt injection protection for your agent",
+    "longDescription": "Klar reviews web pages, PDFs, emails and tool results before your agent acts on them. Detection runs in Klar Cloud; you sign in with your account and plans are billed by usage.",
+    "developerName": "Klar",
+    "category": "Security"
+  }
+}

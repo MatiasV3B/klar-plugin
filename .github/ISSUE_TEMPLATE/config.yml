@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Ask a question or share an idea
+    url: https://github.com/MatiasV3B/klar-plugin/discussions
+    about: Questions, ideas and show-and-tell belong in Discussions.
+  - name: Report a security vulnerability
+    url: https://github.com/MatiasV3B/klar-plugin/security/advisories/new
+    about: Please report vulnerabilities privately. Do not open a public issue.
+  - name: Read the docs
+    url: https://klar-cloud.vercel.app/docs
+    about: Installation guides, use cases and the API reference.

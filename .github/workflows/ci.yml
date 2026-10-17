@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Manifests are valid JSON
+        run: |
+          node -e "for (const f of process.argv.slice(1)) { JSON.parse(require('fs').readFileSync(f, 'utf8')); console.log('ok', f) }" \
+            .claude-plugin/marketplace.json \
+            .agents/plugins/marketplace.json \
+            plugins/klar/.claude-plugin/plugin.json \
+            plugins/klar/.mcp.json \
+            plugins/klar/hooks/hooks.json \
+            codex-plugin/.codex-plugin/plugin.json \
+            codex-plugin/.mcp.json
+
+      - name: Scripts are valid JavaScript
+        run: |
+          for f in plugins/klar/bin/klar.js plugins/klar/hook/hook.js plugins/klar/mcp/proxy.js plugins/klar/src/*.js; do
+            node --check "$f" && echo "ok $f"
+          done
+
+      - name: No secrets or detection logic slipped in
+        run: |
+          if grep -rEn "(sk_live|sk_test|service_role|eyJhbGci|klr_[A-Za-z0-9_-]{20,})" --exclude-dir=.git --exclude-dir=node_modules --exclude-dir=workflows .; then
+            echo "Possible secret found"; exit 1
+          fi
+
+      - name: Hook never echoes reviewed content
+        run: |
+          if grep -n "evidence" plugins/klar/hook/hook.js | grep -v "^\s*//" | grep -v "Sin \`evidence\`" ; then
+            echo "hook.js must not use finding evidence"; exit 1
+          fi
+
+      - name: Markdown links to local files resolve
+        run: |
+          node -e "
+          const fs=require('fs'),path=require('path');
+          const files=['README.md','CONTRIBUTING.md','SECURITY.md','SUPPORT.md','CODE_OF_CONDUCT.md',...fs.readdirSync('docs').filter(f=>f.endsWith('.md')).map(f=>'docs/'+f)];
+          let bad=0;
+          for (const f of files) {
+            const s=fs.readFileSync(f,'utf8');
+            for (const m of s.matchAll(/\]\((?!https?:|#|mailto:)([^)#\s]+)/g)) {
+              const p=path.join(path.dirname(f),m[1]);
+              if(!fs.existsSync(p)){console.error('Broken link in',f,'->',m[1]);bad++}
+            }
+          }
+          process.exit(bad?1:0)"

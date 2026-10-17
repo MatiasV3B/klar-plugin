@@ -1,0 +1,46 @@
+name: Bug report
+description: Something in the plugin, hook, CLI or docs does not work as expected
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time. **Do not paste tokens, API keys or private content.** For security problems, use [private reporting](https://github.com/MatiasV3B/klar-plugin/security/advisories/new) instead.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What did you do, what did you expect, and what happened instead?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Install the plugin
+        2. Ask the agent to ...
+        3. See the error
+    validations:
+      required: true
+  - type: dropdown
+    id: client
+    attributes:
+      label: Where does it happen?
+      options: [Claude Code plugin (hook), Claude Code (MCP only), Codex, Other MCP client, CLI, Docs]
+    validations:
+      required: true
+  - type: input
+    id: versions
+    attributes:
+      label: Versions
+      description: Plugin version, Claude Code or Codex version, Node.js version (`node -v`), and your OS.
+      placeholder: "plugin 0.2.0, Claude Code 2.1.x, Node 22, Windows 11"
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Output or screenshots
+      description: Remove secrets before pasting.
+      render: shell

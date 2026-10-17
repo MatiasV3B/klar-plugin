@@ -1,0 +1,45 @@
+name: Detection report
+description: Klar missed an attack (false negative) or flagged something safe (false positive)
+labels: [detection]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Detection happens in Klar Cloud, so these are fixed there and you do not need to wait for a plugin update. **Remove any real secrets or private data** from your example.
+        If the attack lets someone take over Klar itself or other users, use [private reporting](https://github.com/MatiasV3B/klar-plugin/security/advisories/new) instead.
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What kind of report is this?
+      options: [Missed attack (false negative), Safe content flagged (false positive)]
+    validations:
+      required: true
+  - type: textarea
+    id: example
+    attributes:
+      label: The content
+      description: The smallest example that shows the problem. If the instruction is hidden (white text, HTML comment, PDF layer, encoding), show how it is hidden.
+      render: text
+    validations:
+      required: true
+  - type: dropdown
+    id: source
+    attributes:
+      label: Source
+      options: [web, pdf, image, email, tool, document, user, unknown]
+    validations:
+      required: true
+  - type: input
+    id: profile
+    attributes:
+      label: Profile
+      placeholder: default
+  - type: textarea
+    id: verdict
+    attributes:
+      label: What Klar returned
+      description: Verdict, score and findings (from `klar inspect --json`, if you have it).
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected

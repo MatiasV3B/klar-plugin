@@ -20,7 +20,7 @@ export function createClient({ apiUrl, home, fetchImpl = globalThis.fetch, timeo
         signal: AbortSignal.timeout(timeoutMs),
       });
     } catch (e) {
-      throw new KlarError('network', e.name === 'TimeoutError' ? 'Klar no respondió a tiempo' : `no se pudo conectar con Klar (${e.cause?.code ?? e.message})`);
+      throw new KlarError('network', e.name === 'TimeoutError' ? 'Klar did not respond in time' : `could not connect to Klar (${e.cause?.code ?? e.message})`);
     }
   }
 
@@ -30,14 +30,14 @@ export function createClient({ apiUrl, home, fetchImpl = globalThis.fetch, timeo
   async function refresh(stale) {
     return withLock(home, async () => {
       const cur = creds();
-      if (!cur) throw new KlarError('not_logged_in', 'No has iniciado sesión en Klar. Ejecuta `klar login`.');
+      if (!cur) throw new KlarError('not_logged_in', 'You are not signed in to Klar. Run `klar login`.');
       if (cur.access_token !== stale.access_token) return cur;
       const res = await send('/oauth/token', { method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded' }, body: form({ grant_type: 'refresh_token', refresh_token: cur.refresh_token, client_id: CLI_CLIENT_ID }) });
       if (res.status === 400 || res.status === 401) {
         clearCredentials(home, apiUrl);
-        throw new KlarError('not_logged_in', 'Tu sesión de Klar caducó o fue revocada. Ejecuta `klar login`.');
+        throw new KlarError('not_logged_in', 'Your Klar session expired or was revoked. Run `klar login`.');
       }
-      if (!res.ok) throw new KlarError('server', `Klar respondió ${res.status} al renovar la sesión`);
+      if (!res.ok) throw new KlarError('server', `Klar responded ${res.status} while renewing the session`);
       return store(await res.json(), cur);
     });
   }
@@ -50,13 +50,13 @@ export function createClient({ apiUrl, home, fetchImpl = globalThis.fetch, timeo
 
   async function authed(path, init) {
     let c = creds();
-    if (!c) throw new KlarError('not_logged_in', 'No has iniciado sesión en Klar. Ejecuta `klar login`.');
+    if (!c) throw new KlarError('not_logged_in', 'You are not signed in to Klar. Run `klar login`.');
     if (c.expires_at - now() < 30_000) c = await refresh(c);
     let res = await send(path, init, c.access_token);
     if (res.status === 401) {
       c = await refresh(c);
       res = await send(path, init, c.access_token);
-      if (res.status === 401) throw new KlarError('not_logged_in', 'Klar rechazó tu sesión. Ejecuta `klar login`.');
+      if (res.status === 401) throw new KlarError('not_logged_in', 'Klar rejected your session. Run `klar login`.');
     }
     return res;
   }
@@ -64,11 +64,11 @@ export function createClient({ apiUrl, home, fetchImpl = globalThis.fetch, timeo
   async function failure(res) {
     const body = await res.json().catch(() => ({}));
     const retryAfter = Number(res.headers.get('retry-after')) || undefined;
-    if (res.status === 429) return new KlarError(body.error === 'quota_exceeded' ? 'quota' : 'rate_limited', body.error_description ?? 'límite alcanzado', { retryAfter, upgradeUrl: body.upgrade_url });
-    if (res.status === 402) return new KlarError('subscription', body.error_description ?? 'necesitas una suscripción activa', { upgradeUrl: body.upgrade_url });
-    if (res.status === 403) return new KlarError('plan', body.error_description ?? 'no incluido en tu plan');
-    if (res.status === 400 || res.status === 413) return new KlarError('invalid', body.error_description ?? 'solicitud inválida');
-    return new KlarError('server', `Klar respondió ${res.status}`);
+    if (res.status === 429) return new KlarError(body.error === 'quota_exceeded' ? 'quota' : 'rate_limited', body.error_description ?? 'limit reached', { retryAfter, upgradeUrl: body.upgrade_url });
+    if (res.status === 402) return new KlarError('subscription', body.error_description ?? 'you need an active subscription', { upgradeUrl: body.upgrade_url });
+    if (res.status === 403) return new KlarError('plan', body.error_description ?? 'not included in your plan');
+    if (res.status === 400 || res.status === 413) return new KlarError('invalid', body.error_description ?? 'invalid request');
+    return new KlarError('server', `Klar responded ${res.status}`);
   }
 
   return {
@@ -97,7 +97,7 @@ export function createClient({ apiUrl, home, fetchImpl = globalThis.fetch, timeo
     // ── Inicio de sesión (flujo de dispositivo, RFC 8628) ────────────────────────
     async loginStart() {
       const res = await send('/oauth/device/code', { method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded' }, body: form({ client_id: CLI_CLIENT_ID }) });
-      if (!res.ok) throw new KlarError('server', `Klar respondió ${res.status} al iniciar sesión`);
+      if (!res.ok) throw new KlarError('server', `Klar responded ${res.status} while signing in`);
       const d = await res.json();
       const pending = { device_code: d.device_code, user_code: d.user_code, verification_uri: d.verification_uri, verification_uri_complete: d.verification_uri_complete, interval: d.interval, expires_at: now() + d.expires_in * 1000 };
       mkdirSync(dirname(pendingFile(home)), { recursive: true, mode: 0o700 });

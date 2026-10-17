@@ -1,6 +1,6 @@
 {
   "name": "klar-client",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Plugin de Klar para agentes (Claude Code, MCP). Cliente delgado: no contiene lógica de detección; inicia sesión en Klar Cloud con OAuth.",
   "type": "module",
   "bin": { "klar": "bin/klar.js" },

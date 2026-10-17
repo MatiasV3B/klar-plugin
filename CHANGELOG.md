@@ -4,6 +4,16 @@ All notable changes to the Klar plugin are documented here. The format follows [
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-10-17
+
+### Changed
+- All user-facing text is now in English: hook notices, CLI output, MCP tool descriptions and messages, the `klar-guard` skills, and the sign-in and consent screens.
+- Verdict labels are now `ALLOW`, `FLAG` and `BLOCK`.
+
+### Security
+- MCP tool results and the CLI no longer print the matched excerpt (`evidence`) of a finding, only its rule id, family and severity. The excerpt is attacker-controlled text.
+- The consent screen warns that dynamically registered apps are unverified and shows where you will be sent after approving.
+
 ## [0.2.0] - 2026-10-17
 
 ### Added

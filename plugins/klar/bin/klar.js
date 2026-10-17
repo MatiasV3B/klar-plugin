@@ -17,29 +17,29 @@ function openBrowser(url) {
 }
 
 async function login() {
-  if (client.isLoggedIn() && !args.includes('--force')) { console.log('Ya tienes la sesión iniciada. Usa `klar status` o `klar login --force`.'); return 0; }
+  if (client.isLoggedIn() && !args.includes('--force')) { console.log('You are already signed in. Use `klar status` or `klar login --force`.'); return 0; }
   const p = await client.loginStart();
-  console.log(`\nPara conectar este dispositivo abre:\n  ${p.verification_uri_complete}\n\nCódigo: ${p.user_code}\n`);
+  console.log(`\nTo connect this device, open:\n  ${p.verification_uri_complete}\n\nCode: ${p.user_code}\n`);
   if (!args.includes('--no-browser')) openBrowser(p.verification_uri_complete);
   let wait = p.interval * 1000;
   while (Date.now() < p.expires_at) {
     await sleep(wait + 200);
     const { status } = await client.loginPoll();
-    if (status === 'ok') { console.log('✔ Sesión iniciada.'); return 0; }
+    if (status === 'ok') { console.log('✔ Signed in.'); return 0; }
     if (status === 'slow_down') wait += 5000;
-    if (['denied', 'expired', 'none'].includes(status)) { console.error(`✘ ${status === 'denied' ? 'Cancelaste el acceso.' : 'El código expiró. Vuelve a ejecutar `klar login`.'}`); return 1; }
+    if (['denied', 'expired', 'none'].includes(status)) { console.error(`✘ ${status === 'denied' ? 'Access cancelled.' : 'The code expired. Run `klar login` again.'}`); return 1; }
   }
-  console.error('✘ El código expiró.');
+  console.error('✘ The code expired.');
   return 1;
 }
 
 async function main() {
   switch (cmd) {
     case 'login': return login();
-    case 'logout': console.log((await client.logout()) ? 'Sesión cerrada.' : 'No había sesión.'); return 0;
+    case 'logout': console.log((await client.logout()) ? 'Signed out.' : 'You were not signed in.'); return 0;
     case 'status': {
       const me = await client.me();
-      console.log(`${me.email} · plan ${me.plan} · ${me.usage.used}/${me.usage.limit} revisiones este mes · perfiles: ${me.limits.profiles.join(', ')}\nServidor: ${cfg.apiUrl}`);
+      console.log(`${me.email} · plan ${me.plan} · ${me.usage.used}/${me.usage.limit} reviews this month · profiles: ${me.limits.profiles.join(', ')}\nServer: ${cfg.apiUrl}`);
       return 0;
     }
     case 'inspect': {
@@ -48,14 +48,14 @@ async function main() {
       const r = await client.inspect({ source: option('source') ?? 'unknown', profile: option('profile') ?? cfg.profile, url: option('url'), ...(args.includes('--html') ? { html: clip(content) } : { text: clip(content) }) });
       if (args.includes('--json')) console.log(JSON.stringify(r, null, 2));
       else {
-        console.log(`${{ allow: 'PERMITIR', flag: 'MARCAR', block: 'BLOQUEAR' }[r.action]} · puntaje ${r.score}/100 · perfil ${r.profile}`);
-        for (const f of [...r.findings].sort((a, b) => b.severity - a.severity).slice(0, 5)) console.log(`  · [${f.vector}] ${f.id} (${f.severity}): ${f.evidence}`);
-        console.log(`Uso del mes: ${r.usage.used}/${r.usage.limit}`);
+        console.log(`${{ allow: 'ALLOW', flag: 'FLAG', block: 'BLOCK' }[r.action]} · score ${r.score}/100 · profile ${r.profile}`);
+        for (const f of [...r.findings].sort((a, b) => b.severity - a.severity).slice(0, 5)) console.log(`  · [${f.vector}] ${f.id} (${f.severity})`);
+        console.log(`Usage this month: ${r.usage.used}/${r.usage.limit}`);
       }
       return { allow: 0, flag: 1, block: 2 }[r.action]; // 0 permitir · 1 marcar · 2 bloquear
     }
     default:
-      console.error('Uso: klar login [--force] [--no-browser] | logout | status | inspect [archivo] [--source web|pdf|…] [--html] [--profile …] [--json]');
+      console.error('Usage: klar login [--force] [--no-browser] | logout | status | inspect [file] [--source web|pdf|…] [--html] [--profile …] [--json]');
       return 64;
   }
 }

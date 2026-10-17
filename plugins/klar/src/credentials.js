@@ -41,7 +41,7 @@ export async function withLock(home, fn, { timeoutMs = 8000, staleMs = 15000 } =
     try { closeSync(openSync(lock, 'wx')); break; } catch (e) {
       if (e.code !== 'EEXIST') throw e;
       try { if (Date.now() - statSync(lock).mtimeMs > staleMs) unlinkSync(lock); } catch { /* otro proceso lo liberó */ }
-      if (Date.now() - start > timeoutMs) throw new Error('no se pudo obtener el candado de renovación');
+      if (Date.now() - start > timeoutMs) throw new Error('could not acquire the renewal lock');
       await new Promise((r) => setTimeout(r, 40 + Math.random() * 40));
     }
   }
